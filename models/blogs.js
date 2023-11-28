@@ -4,7 +4,6 @@ const blogSchema = new mongoose.Schema({
     title:{
         type: String,
         require: true,
-        timestamps: true
     },
     content:{
         type: String,
@@ -14,6 +13,8 @@ const blogSchema = new mongoose.Schema({
         type: String,
         required: true
     }
+},{
+    timestamps: true
 })
 
 module.exports = mongoose.model('Blogs',blogSchema);

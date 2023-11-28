@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const Blogs = require('./models/blogs');
 const bodyParser = require('body-parser');
 require('dotenv').config();
@@ -13,14 +13,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const pathName = "./models/data.json";
 
 // Connecting to MongoDB
-mongoose.connect(process.env.DBURL);
-const con = mongoose.connection;
-con.on('open',()=>console.log("DB connected"));
+// mongoose.connect(process.env.DBURL);
+// const con = mongoose.connection;
+// con.on('open',()=>console.log("DB connected"));
 
 // READ DATA
 app.get('/read',async(req,res) => {
 
     // JSON file
+    console.log(typeof req.body.content);
     res.send(data);
 
     // MongoDB
@@ -51,9 +52,9 @@ app.get('/read/:id',async(req,res)=>{
 
 // PostMan body for creating record
 // {
-//     "title":"How to train your dragon",
-//     "content":"Just train it",
-//     "author":"anonymous"
+//     "title":"",
+//     "content":"",
+//     "author":""
 // }
 
 // CREATE/ WRITE DATA
@@ -61,14 +62,21 @@ app.post('/create',async(req,res)=>{
 
     // JSON file
     const timestamp = Date.now().toString();
-    data[timestamp] = req.body;
-    fs.writeFile("./models/data.json",
-        JSON.stringify(data),
-        (e)=>{
-            if(e) throw e;
-            res.send(data);
-        }
-    )
+    if(req.body.content.length > 100) res.send({message:"You are over the character limit allowed for this field"})
+    else if(req.body.content.length == 0 || req.body.title.length ==0 || req.body.author.length == 0) res.send({message:"Input values cannot be empty"}) 
+    else {
+        
+        data[timestamp] = req.body;
+
+        fs.writeFile("./models/data.json",
+            JSON.stringify(data),
+            (e)=>{
+                if(e) throw e;
+                res.send(data);
+            }
+        )
+    }
+    
 
     // MongoDB
     // const newBlog = new Blogs({
@@ -90,14 +98,19 @@ app.post('/create',async(req,res)=>{
 app.put('/update/:id',async(req,res)=>{
 
     // JSON file
-    data[req.params['id']] = req.body
-    fs.writeFile("./models/data.json",
-        JSON.stringify(data),
-        (e)=>{
-            if(e) throw e;
-            res.send(data);
-        }
-    )
+    if(req.body.content.length > 100) res.send({message:"You are over the character limit allowed for this field"})
+    else if(req.body.content.length == 0 || req.body.title.length ==0 || req.body.author.length == 0) res.send({message:"Input values cannot be empty"})
+    else{
+        data[req.params['id']] = req.body
+        fs.writeFile("./models/data.json",
+            JSON.stringify(data),
+            (e)=>{
+                if(e) throw e;
+                res.send(data);
+            }
+        )
+    }
+    
 
     // MongoDB
     // try {
