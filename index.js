@@ -6,148 +6,24 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const port = process.env.PORT;
 const data = require("./models/data.json");
-const fs = require("fs");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const pathName = "./models/data.json";
+const readRoute = require("./routes/read")
+const updateRoute = require("./routes/update")
+const createRoute = require("./routes/create")
+const deleteRoute = require("./routes/delete")
+
+app.use('/create',createRoute)
+app.use('/read',readRoute)
+app.use('/update',updateRoute)
+app.use('/delete',deleteRoute)
 
 // Connecting to MongoDB
 // mongoose.connect(process.env.DBURL);
 // const con = mongoose.connection;
 // con.on('open',()=>console.log("DB connected"));
-
-// READ DATA
-app.get('/read',async(req,res) => {
-
-    // JSON file
-    console.log(typeof req.body.content);
-    res.send(data);
-
-    // MongoDB
-    // try {
-    //     const allBlogs = await Blogs.find()
-    //     res.status(200).json(allUsers)
-    // } catch (error) {
-    //     res.send("Error "+ error)
-    // }
-
-})
-
-// READ ONE RECORD WITH ID
-app.get('/read/:id',async(req,res)=>{
-
-    // JSON file
-    res.send(data[req.params['id']]);
-
-    // MongoDB
-    // try {
-    //     const blog = await Blogs.findById(req.params['id'])
-    //     res.send(blog) 
-    // } catch (error) {
-    //     res.send("Error "+ error)
-    // }
-
-})
-
-// PostMan body for creating record
-// {
-//     "title":"",
-//     "content":"",
-//     "author":""
-// }
-
-// CREATE/ WRITE DATA
-app.post('/create',async(req,res)=>{
-
-    // JSON file
-    const timestamp = Date.now().toString();
-    if(req.body.content.length > 100) res.send({message:"You are over the character limit allowed for this field"})
-    else if(req.body.content.length == 0 || req.body.title.length ==0 || req.body.author.length == 0) res.send({message:"Input values cannot be empty"}) 
-    else {
-        
-        data[timestamp] = req.body;
-
-        fs.writeFile("./models/data.json",
-            JSON.stringify(data),
-            (e)=>{
-                if(e) throw e;
-                res.send(data);
-            }
-        )
-    }
-    
-
-    // MongoDB
-    // const newBlog = new Blogs({
-    //     title:req.body.title,
-    //     content:req.body.content,
-    //     author:req.body.author
-    // })
-
-    // try {
-    //     const snd = await newBlog.save();
-    //     res.json(snd);
-    // } catch (error) {
-    //     res.send("Error "+ error);
-    // }
-
-})
-
-// UPDATE DATA
-app.put('/update/:id',async(req,res)=>{
-
-    // JSON file
-    if(req.body.content.length > 100) res.send({message:"You are over the character limit allowed for this field"})
-    else if(req.body.content.length == 0 || req.body.title.length ==0 || req.body.author.length == 0) res.send({message:"Input values cannot be empty"})
-    else{
-        data[req.params['id']] = req.body
-        fs.writeFile("./models/data.json",
-            JSON.stringify(data),
-            (e)=>{
-                if(e) throw e;
-                res.send(data);
-            }
-        )
-    }
-    
-
-    // MongoDB
-    // try {
-    //     const blog = await Blogs.findById(req.params['id'])
-    //     blog.title = req.body.title;
-    //     blog.content = req.body.content;
-    //     blog.author = req.body.author;
-    //     const snd = await blog.save()
-    //     res.json(snd)
-    // } catch (error) {
-    //     res.send('Error')
-    // }
-
-})
-
-// DELETE DATA
-app.delete('/delete/:id',async(req,res)=>{
-
-    // JSON file
-    delete data[req.params['id']];
-    fs.writeFile(pathName,
-        JSON.stringify(data),
-        (e)=>{
-            if(e) throw e;
-            res.send(data);
-        }
-    )
-
-    // MongoDB
-    // try {
-    //     const blog = await Blogs.findById(req.params['id'])
-    //     const snd = await blog.remove()
-    //     res.json(snd)
-    // } catch (error) {
-    //     res.send('Error')
-    // }
-})
 
 app.listen(port, ()=>{
     console.log(`Api project is running at http://localhost:${port}`);
