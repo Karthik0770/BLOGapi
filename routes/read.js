@@ -21,7 +21,8 @@ router.get('/',async(req,res) => {
 router.get('/:id',async(req,res)=>{
 
     // JSON file
-    res.send(data[req.params['id']]);
+    if(data[req.params['id']]==null) res.send({message:"Record matching the given id is not found"})
+    else res.send(data[req.params['id']]);
 
     // MongoDB
     // try {
